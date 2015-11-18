@@ -1,0 +1,5 @@
+#surefire
+#Thu Nov 12 12:04:01 IRST 2015
+user.dir=/home/zahra/eclipseWorkspace/BankTransactions
+localRepository=/home/zahra/.m2/repository
+basedir=/home/zahra/eclipseWorkspace/BankTransactions
