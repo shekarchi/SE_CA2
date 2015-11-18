@@ -113,7 +113,7 @@ public class ClientTerminal {
         for (int i = 0; i < 3; i++) {
             System.out.println(in.readLine() + "\n");
         }
-        while(true) {
+        /*while(true) {
         	String input = "";
         	try{
         		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
@@ -133,7 +133,23 @@ public class ClientTerminal {
                 response = "Error: " + ex;
             }
             System.out.println(response + "\n");
-        }
+        }*/
+    }
+    
+    public void sendRequestToServer(ArrayList<Transaction> transactions) {
+    	for(int i=0; i<transactions.size(); i++) {	
+    	    out.println(transactions.get(i).toString());
+            String response;	
+            try {
+                response = in.readLine();
+                if (response == null || response.equals("")) {
+                    System.exit(0);
+                }
+            } catch (IOException ex) {
+                response = "Error: " + ex;
+            }
+            System.out.println(response + "\n");
+    	}
     }
 
     /**
@@ -143,9 +159,11 @@ public class ClientTerminal {
     	
     	MyXMLParser xmlParser = new ClientTerminal(). new MyXMLParser("/home/zahra/eclipseWorkspace/BankTransactions/src/main/java/terminal.xml");
     	xmlParser.parseXmlFile();
-    	xmlParser.printParsedFile();
+    	
+    	ArrayList<Transaction> transactions = xmlParser.getTransactionsList();
     	   	
         ClientTerminal client = new ClientTerminal();
         client.connectToServer(xmlParser.xServerIP, new Integer(xmlParser.xServerPort));
+        client.sendRequestToServer(transactions);
     }
 }
