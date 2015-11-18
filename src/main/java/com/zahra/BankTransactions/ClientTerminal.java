@@ -141,6 +141,7 @@ public class ClientTerminal {
     	}
     }
 
+    //I used given link for this class: http://stackoverflow.com/questions/7373567/java-how-to-read-and-write-xml-files
     public static void saveToXML(String filename, ArrayList<Transaction> transactions) {
         Document wdom;
         Element e = null;

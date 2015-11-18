@@ -16,7 +16,7 @@ public class Deposit {
 		this.upperBound = upperBound;
 	}
 	
-	public void applyRequestOnDepo(String requestType, BigDecimal value) throws Exception{
+	public synchronized void applyRequestOnDepo(String requestType, BigDecimal value) throws Exception{
 		try {
 			if(requestType.equals("deposit")) {
 				increaseBalance(value);
@@ -51,9 +51,7 @@ public class Deposit {
 	}
 	
 	public String getCustomer() {
-		synchronized (this) {
-			return customer;
-		}
+		return customer;
 	}
 	public void setCustomer(String customer) {
 		this.customer = customer;
