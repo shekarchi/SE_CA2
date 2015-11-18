@@ -38,7 +38,7 @@ public class Deposit {
 		BigDecimal tempBalance = initialBalance;
 		if(tempBalance.add(val).compareTo(upperBound) > 0)
 			throw new UpperBoundExceededException();
-		initialBalance.add(val);
+		initialBalance = initialBalance.add(val);
 	}
 	
 	private void decreaseBalance (BigDecimal val) throws Exception{
@@ -47,7 +47,7 @@ public class Deposit {
 		BigDecimal tempBalance = initialBalance;
 		if(tempBalance.subtract(val).compareTo(new BigDecimal(0)) < 0)
 			throw new LowerBoundExceededException();
-		initialBalance.subtract(val);
+		initialBalance = initialBalance.subtract(val);
 	}
 	
 	public String getCustomer() {

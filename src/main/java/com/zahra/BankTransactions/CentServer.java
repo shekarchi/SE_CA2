@@ -90,6 +90,30 @@ public class CentServer {
         try {
             while (true) {
                 new Service(listener.accept(), clientNumber++).start();
+                Thread console = new Service(){
+                	@Override
+                	public void run() {
+                		try {
+                			 BufferedReader bufferReader = new BufferedReader(new InputStreamReader(System.in));
+                			 try {
+                				 String command = bufferReader.readLine();
+                				 if (command.equals("sync")){
+	                				 System.out.println("start to save ...");
+                					 sync();
+                				 }
+                				 else{
+                					 System.out.println("error");
+                				 }
+            				 } catch (IOException e) {
+            				 // TODO Auto-generated catch block
+            				 e.printStackTrace();
+            				 }
+                		} catch (Exception e) {
+                			;
+                		}
+                	}
+                };
+                console.start();
             }
         } finally {
             listener.close();
@@ -105,6 +129,10 @@ public class CentServer {
         private Socket socket;
         private int clientNumber;
 
+        public Service() {
+        	;
+        }
+        
         public Service(Socket socket, int clientNumber) {
             this.socket = socket;
             this.clientNumber = clientNumber;
@@ -172,7 +200,8 @@ public class CentServer {
         							+ " requestType: " + words[3]
         							+ " amount: " + words[4]
         							+ " depositId: " + words[5]
-        							+ " result: " + result);
+        							+ " result: " + result
+        							+ " balance: " + d.getInitialBalance());
         	} catch(Exception e) {
         		saveToLogFile(outLog, "terminalId: " + words[0]
 						+ " terminalType: " + words[1]
@@ -180,7 +209,8 @@ public class CentServer {
 						+ " requestType: " + words[3]
 						+ " amount: " + words[4]
 						+ " depositId: " + words[5]
-						+ " result: " + result);
+						+ " result: " + result
+						+ " balance: " + d.getInitialBalance());
         		System.out.println(e.toString() + " happened.");
         	}
         	return result;
@@ -206,5 +236,33 @@ public class CentServer {
         		out.close();
         	}
         }
+    }
+    
+    @SuppressWarnings("unchecked")
+	private static void sync() {
+    	JSONObject wJsonObject = new JSONObject();
+    	wJsonObject.put("port", port);
+
+    	JSONArray jsonDeposits = new JSONArray();
+    	for (int i = 0 ; i < deposits.size() ; i++){
+	    	JSONObject tempDeposit = new JSONObject();
+	    	tempDeposit.put("customer", deposits.get(i).getCustomer());
+	    	tempDeposit.put("id", deposits.get(i).getId());
+	    	tempDeposit.put("initialBalance", deposits.get(i).getInitialBalance());	
+	    	tempDeposit.put("upperBound", deposits.get(i).getUpperBound());
+	    	jsonDeposits.add(tempDeposit);
+    	}
+
+    	wJsonObject.put("deposits", jsonDeposits);
+    	wJsonObject.put(new String ("outLog"), outLog);
+
+    	try {
+	    	FileWriter file = new FileWriter("/home/zahra/eclipseWorkspace/BankTransactions/src/main/java/core.json");
+	    	file.write(wJsonObject.toJSONString());
+	    	file.flush();
+	    	file.close();
+    	} catch (IOException e) {
+    		e.printStackTrace();
+    	}
     }
 }

@@ -36,7 +36,7 @@ public class ClientTerminal {
     private String outlogPath;
     
     //I used given link for this class: http://www.java-samples.com/showtutorial.php?tutorialid=152
-    private class MyXMLParser {
+    public class MyXMLParser {
     	private String filename;
     	private Document dom;
     	private String xId;
@@ -46,6 +46,18 @@ public class ClientTerminal {
         private String xOutlogPath;
         private ArrayList<Transaction> transactionsList = null;
     	
+        public String getServerIP() {
+        	return xServerIP;
+        }
+        
+        public String getServerPort() {
+        	return xServerPort;
+        }
+        
+        public String getId() {
+        	return xId;
+        }
+        
         public MyXMLParser(String _filename) {
         	filename = _filename;
         	transactionsList = new ArrayList<Transaction>();
@@ -139,57 +151,5 @@ public class ClientTerminal {
             transactions.get(i).setStatus(response);
             System.out.println(response + "\n");
     	}
-    }
-
-    //I used given link for this class: http://stackoverflow.com/questions/7373567/java-how-to-read-and-write-xml-files
-    public static void saveToXML(String filename, ArrayList<Transaction> transactions) {
-        Document wdom;
-        Element e = null;
-        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-        try {
-            DocumentBuilder db = dbf.newDocumentBuilder();
-            wdom = db.newDocument();
-            Element rootEle = wdom.createElement("terminal");
-
-            for (int i=0; i<transactions.size(); i++) {
-	            e = wdom.createElement("transaction");
-	            e.setAttribute("transactionId", transactions.get(i).getId());
-	            e.setAttribute("transactionStatus", transactions.get(i).getStatus());
-	            rootEle.appendChild(e);
-	        }
-            wdom.appendChild(rootEle);
-
-            try {
-                Transformer tr = TransformerFactory.newInstance().newTransformer();
-                tr.setOutputProperty(OutputKeys.INDENT, "yes");
-                tr.setOutputProperty(OutputKeys.METHOD, "xml");
-                tr.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
-                tr.setOutputProperty(OutputKeys.DOCTYPE_SYSTEM, "roles.dtd");
-                tr.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
-                tr.transform(new DOMSource(wdom), new StreamResult(new FileOutputStream(filename)));
-
-            } catch (TransformerException te) {
-                System.out.println(te.getMessage());
-            } catch (IOException ioe) {
-                System.out.println(ioe.getMessage());
-            }
-        } catch (ParserConfigurationException pce) {
-            System.out.println("UsersXML: Error trying to instantiate DocumentBuilder " + pce);
-        }
-    }
-    
-    /**
-     * Runs the client application.
-     */
-    public static void main(String[] args) throws Exception {
-    	
-    	MyXMLParser xmlParser = new ClientTerminal(). new MyXMLParser("/home/zahra/eclipseWorkspace/BankTransactions/src/main/java/"+ args[0]);
-    	xmlParser.parseXmlFile();
-    	
-    	ArrayList<Transaction> transactions = xmlParser.getTransactionsList();
-    	   	
-        ClientTerminal client = new ClientTerminal();
-        client.connectToServer(xmlParser.xServerIP, new Integer(xmlParser.xServerPort), transactions, xmlParser);
-        saveToXML("/home/zahra/eclipseWorkspace/BankTransactions/src/main/java/response"+xmlParser.xId+".xml", transactions);
     }
 }
