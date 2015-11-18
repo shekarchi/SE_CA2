@@ -1,0 +1,4 @@
+terminalId: 21374 terminalType: ATM transactionId: 1 requestType: deposit amount: 3000 depositId: 33227781 result: success
+terminalId: 21374 terminalType: ATM transactionId: 2 requestType: withdraw amount: 10000 depositId: 35527439 result: failed
+terminalId: 21374 terminalType: ATM transactionId: 1 requestType: deposit amount: 3000 depositId: 33227781 result: success
+terminalId: 21374 terminalType: ATM transactionId: 2 requestType: withdraw amount: 10000 depositId: 35527439 result: failed

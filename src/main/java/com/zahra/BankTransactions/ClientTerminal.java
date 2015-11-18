@@ -111,7 +111,7 @@ public class ClientTerminal {
     }
     
     
-    public void connectToServer(String serverAddress, int portNumber, ArrayList<Transaction> transactions) throws IOException {
+    public void connectToServer(String serverAddress, int portNumber, ArrayList<Transaction> transactions, MyXMLParser xmlParser) throws IOException {
     	System.out.println("Welcome to Bank");
     	Socket socket = new Socket(serverAddress, portNumber);
         in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
@@ -121,12 +121,12 @@ public class ClientTerminal {
         for (int i = 0; i < 2; i++) {
             System.out.println(in.readLine());
         }   
-        sendRequestToServer(transactions);
+        sendRequestToServer(transactions, xmlParser);
     }
     
-    public void sendRequestToServer(ArrayList<Transaction> transactions) {
+    public void sendRequestToServer(ArrayList<Transaction> transactions, MyXMLParser xmlParser) {
     	for(int i=0; i<transactions.size(); i++) {	
-    	    out.println(id + "#" + type + "#" + transactions.get(i).toString());
+    	    out.println(xmlParser.xId + "#" + xmlParser.xType + "#" + transactions.get(i).toString());
             String response;	
             try {
                 response = in.readLine();
@@ -189,7 +189,7 @@ public class ClientTerminal {
     	ArrayList<Transaction> transactions = xmlParser.getTransactionsList();
     	   	
         ClientTerminal client = new ClientTerminal();
-        client.connectToServer(xmlParser.xServerIP, new Integer(xmlParser.xServerPort), transactions);
+        client.connectToServer(xmlParser.xServerIP, new Integer(xmlParser.xServerPort), transactions, xmlParser);
         saveToXML("/home/zahra/eclipseWorkspace/BankTransactions/src/main/java/response"+xmlParser.xId+".xml", transactions);
     }
 }

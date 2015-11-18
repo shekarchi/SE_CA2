@@ -2,8 +2,10 @@ package com.zahra.BankTransactions;
 
 import java.io.BufferedReader;
 
+import java.io.BufferedWriter;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
@@ -135,8 +137,6 @@ public class CentServer {
                     }
                     String result = performRequest(input);
                     
-                    System.err.println(result);
-                    
                     out.println(result);
                 }
             } catch (IOException e) {
@@ -166,7 +166,21 @@ public class CentServer {
         	try {
         		d.applyRequestOnDepo(words[3], new BigDecimal(words[4]));
         		result = "success";
+        		saveToLogFile(outLog, "terminalId: " + words[0]
+        							+ " terminalType: " + words[1]
+        							+ " transactionId: " + words[2]
+        							+ " requestType: " + words[3]
+        							+ " amount: " + words[4]
+        							+ " depositId: " + words[5]
+        							+ " result: " + result);
         	} catch(Exception e) {
+        		saveToLogFile(outLog, "terminalId: " + words[0]
+						+ " terminalType: " + words[1]
+						+ " transactionId: " + words[2]
+						+ " requestType: " + words[3]
+						+ " amount: " + words[4]
+						+ " depositId: " + words[5]
+						+ " result: " + result);
         		System.out.println(e.toString() + " happened.");
         	}
         	return result;
@@ -179,6 +193,18 @@ public class CentServer {
         	}
         	System.out.println("Invalid deposit id #" + depoId);
         	return null;
+        }
+        
+        private synchronized void saveToLogFile(String filename, String line) {
+        	PrintWriter out = null;
+        	try{
+        		out = new PrintWriter(new BufferedWriter(new FileWriter("/home/zahra/eclipseWorkspace/BankTransactions/src/main/java/"+filename, true)));
+        	    out.println(line);
+        	}catch (IOException e) {
+        	    //exception handling left 
+        	} finally {
+        		out.close();
+        	}
         }
     }
 }
