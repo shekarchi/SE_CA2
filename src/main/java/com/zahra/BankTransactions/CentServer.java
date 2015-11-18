@@ -79,6 +79,7 @@ public class CentServer {
         deposits = new ArrayList<Deposit>();
         
         parseJSONFile("/home/zahra/eclipseWorkspace/BankTransactions/src/main/java/core.json");
+        printParsedFile ();
         
         int clientNumber = 0;
         int portNumber = new Integer(port);
