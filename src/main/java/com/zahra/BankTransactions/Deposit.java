@@ -16,8 +16,44 @@ public class Deposit {
 		this.upperBound = upperBound;
 	}
 	
+	public void applyRequestOnDepo(String requestType, BigDecimal value) throws Exception{
+		try {
+			if(requestType.equals("deposit")) {
+				increaseBalance(value);
+			}
+			else if (requestType.equals("withdraw")) {
+				decreaseBalance(value);
+			}
+			else {
+				throw new InvalidRequestException();
+			}
+		} catch(Exception e) {
+			throw e;
+		}
+	}
+	
+	private void increaseBalance (BigDecimal val) throws Exception{
+		if(val.compareTo(new BigDecimal(0)) < 0)
+			throw new NegativeAmountException();
+		BigDecimal tempBalance = initialBalance;
+		if(tempBalance.add(val).compareTo(upperBound) > 0)
+			throw new UpperBoundExceededException();
+		initialBalance.add(val);
+	}
+	
+	private void decreaseBalance (BigDecimal val) throws Exception{
+		if(val.compareTo(new BigDecimal(0)) < 0)
+			throw new NegativeAmountException();
+		BigDecimal tempBalance = initialBalance;
+		if(tempBalance.subtract(val).compareTo(new BigDecimal(0)) < 0)
+			throw new LowerBoundExceededException();
+		initialBalance.subtract(val);
+	}
+	
 	public String getCustomer() {
-		return customer;
+		synchronized (this) {
+			return customer;
+		}
 	}
 	public void setCustomer(String customer) {
 		this.customer = customer;
@@ -40,4 +76,29 @@ public class Deposit {
 	public void setUpperBound(BigDecimal upperBound) {
 		this.upperBound = upperBound;
 	}
+}
+
+class UpperBoundExceededException extends Exception {
+	public String toString(){ 
+	       return ("UpperBoundExceededException") ;
+	    }
+	
+}
+class NegativeAmountException extends Exception {
+	public String toString(){ 
+	       return ("NegativeIncreamentException") ;
+	    }
+	
+}
+class LowerBoundExceededException extends Exception {
+	public String toString(){ 
+	       return ("LowerBoundExceededException") ;
+	    }
+	
+}
+class InvalidRequestException extends Exception {
+	public String toString(){ 
+	       return ("InvalidRequestException") ;
+	    }
+	
 }

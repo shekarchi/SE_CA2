@@ -1,6 +1,7 @@
 package com.zahra.BankTransactions;
 
 import java.io.BufferedReader;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
@@ -16,6 +17,13 @@ import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
+
+import javax.xml.parsers.*;
+import javax.xml.transform.*;
+import javax.xml.transform.dom.*;
+import javax.xml.transform.stream.*;
+import org.xml.sax.*;
+import org.w3c.dom.*;
 
 public class ClientTerminal {
 
@@ -103,21 +111,22 @@ public class ClientTerminal {
     }
     
     
-    public void connectToServer(String serverAddress, int portNumber) throws IOException {
+    public void connectToServer(String serverAddress, int portNumber, ArrayList<Transaction> transactions) throws IOException {
     	System.out.println("Welcome to Bank");
     	Socket socket = new Socket(serverAddress, portNumber);
         in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
         out = new PrintWriter(socket.getOutputStream(), true);
         
         // Consume the initial welcoming messages from the server
-        for (int i = 0; i < 3; i++) {
-            System.out.println(in.readLine() + "\n");
-        }    
+        for (int i = 0; i < 2; i++) {
+            System.out.println(in.readLine());
+        }   
+        sendRequestToServer(transactions);
     }
     
     public void sendRequestToServer(ArrayList<Transaction> transactions) {
     	for(int i=0; i<transactions.size(); i++) {	
-    	    out.println(id + "#" + type + "#" +transactions.get(i).toString());
+    	    out.println(id + "#" + type + "#" + transactions.get(i).toString());
             String response;	
             try {
                 response = in.readLine();
@@ -127,10 +136,47 @@ public class ClientTerminal {
             } catch (IOException ex) {
                 response = "Error: " + ex;
             }
+            transactions.get(i).setStatus(response);
             System.out.println(response + "\n");
     	}
     }
 
+    public static void saveToXML(String filename, ArrayList<Transaction> transactions) {
+        Document wdom;
+        Element e = null;
+        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+        try {
+            DocumentBuilder db = dbf.newDocumentBuilder();
+            wdom = db.newDocument();
+            Element rootEle = wdom.createElement("terminal");
+
+            for (int i=0; i<transactions.size(); i++) {
+	            e = wdom.createElement("transaction");
+	            e.setAttribute("transactionId", transactions.get(i).getId());
+	            e.setAttribute("transactionStatus", transactions.get(i).getStatus());
+	            rootEle.appendChild(e);
+	        }
+            wdom.appendChild(rootEle);
+
+            try {
+                Transformer tr = TransformerFactory.newInstance().newTransformer();
+                tr.setOutputProperty(OutputKeys.INDENT, "yes");
+                tr.setOutputProperty(OutputKeys.METHOD, "xml");
+                tr.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
+                tr.setOutputProperty(OutputKeys.DOCTYPE_SYSTEM, "roles.dtd");
+                tr.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
+                tr.transform(new DOMSource(wdom), new StreamResult(new FileOutputStream(filename)));
+
+            } catch (TransformerException te) {
+                System.out.println(te.getMessage());
+            } catch (IOException ioe) {
+                System.out.println(ioe.getMessage());
+            }
+        } catch (ParserConfigurationException pce) {
+            System.out.println("UsersXML: Error trying to instantiate DocumentBuilder " + pce);
+        }
+    }
+    
     /**
      * Runs the client application.
      */
@@ -142,7 +188,7 @@ public class ClientTerminal {
     	ArrayList<Transaction> transactions = xmlParser.getTransactionsList();
     	   	
         ClientTerminal client = new ClientTerminal();
-        client.connectToServer(xmlParser.xServerIP, new Integer(xmlParser.xServerPort));
-        client.sendRequestToServer(transactions);
+        client.connectToServer(xmlParser.xServerIP, new Integer(xmlParser.xServerPort), transactions);
+        saveToXML("/home/zahra/eclipseWorkspace/BankTransactions/src/main/java/response"+xmlParser.xId+".xml", transactions);
     }
 }

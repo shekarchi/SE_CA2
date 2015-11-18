@@ -24,15 +24,7 @@ public class CentServer {
     static String outLog = "";
     static ArrayList<Deposit> deposits = null;
     
-    private static void addDeposit(JSONObject o) {
-    	String customerName = o.get(new String("customer")).toString();
-		String id = o.get("id").toString();
-		BigDecimal initialBalance = new BigDecimal(o.get("initialBalance").toString());
-		BigDecimal upperBound = new BigDecimal (o.get(new String("upperBound")).toString());
-		Deposit d = new Deposit(customerName, id, initialBalance, upperBound);
-		deposits.add(d);
-    }
-    
+    //I used given link for these functions: http://www.mkyong.com/java/json-simple-example-read-and-write-json/
     private static void parseJSONFile(String filename) {
     	JSONParser parser = new JSONParser();
         try {
@@ -58,7 +50,16 @@ public class CentServer {
     		e.printStackTrace();
     	}
     }
-	
+    
+    private static void addDeposit(JSONObject o) {
+    	String customerName = o.get(new String("customer")).toString();
+		String id = o.get("id").toString();
+		BigDecimal initialBalance = new BigDecimal(o.get("initialBalance").toString());
+		BigDecimal upperBound = new BigDecimal (o.get(new String("upperBound")).toString());
+		Deposit d = new Deposit(customerName, id, initialBalance, upperBound);
+		deposits.add(d);
+    }
+    
     private static void printParsedFile () {
     	System.err.println(port + "\t" + outLog);
     	for(int i=0; i<deposits.size(); i++)
@@ -115,26 +116,28 @@ public class CentServer {
          */
         public void run() {
             try {
-
-                // Decorate the streams so we can send characters
-                // and not just bytes.  Ensure output is flushed
-                // after every newline.
+                // Ensure output is flushed after every newline. 
                 BufferedReader in = new BufferedReader(
                         new InputStreamReader(socket.getInputStream()));
                 PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
 
                 // Send a welcome message to the client.
                 out.println("Hello, you are client #" + clientNumber + ".");
-                out.println("Enter a line with only a period to quit\n");
+                out.println("Enter a line with only a period to quit");
 
-                // Get messages from the client, line by line; return them
-                // capitalized
                 while (true) {
                     String input = in.readLine();
+                    
+                    System.err.println(input);
+                    
                     if (input == null || input.equals(".")) {
                         break;
                     }
-                    out.println(input.toUpperCase());
+                    String result = performRequest(input);
+                    
+                    System.err.println(result);
+                    
+                    out.println(result);
                 }
             } catch (IOException e) {
                 System.out.println("Error handling client# " + clientNumber + ": " + e);
@@ -146,6 +149,36 @@ public class CentServer {
                 }
                 System.out.println("Connection with client# " + clientNumber + " closed");
             }
+        }
+        
+        private String performRequest(String request) {
+        	String result = "failed";
+        	
+        	//terminalId#treminalTye#1#requestType#amount#deposit
+        	//0         #1          #2#3          #4     #5
+         	String[] words = request.split("#");
+         	
+         	System.err.println(words[0] + " " + words[1] + " " + words[2] + " " + words[3] + " " + words[4]);
+         	
+        	Deposit d = findDepositById(words[5]);
+        	if(d == null)
+        		return "Deposit id is invalid.";
+        	try {
+        		d.applyRequestOnDepo(words[3], new BigDecimal(words[4]));
+        		result = "success";
+        	} catch(Exception e) {
+        		System.out.println(e.toString() + " happened.");
+        	}
+        	return result;
+        }
+        
+        private Deposit findDepositById(String depoId) {
+        	for(int i=0; i<deposits.size(); i++) {
+        		if(deposits.get(i).getId().equals(depoId))
+        			return deposits.get(i);
+        	}
+        	System.out.println("Invalid deposit id #" + depoId);
+        	return null;
         }
     }
 }

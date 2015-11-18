@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE terminal SYSTEM "roles.dtd">
+<terminal>
+    <transaction transactionId="1" transactionStatus="success"/>
+    <transaction transactionId="2" transactionStatus="failed"/>
+</terminal>

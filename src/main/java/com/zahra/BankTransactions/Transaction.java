@@ -8,6 +8,7 @@ public class Transaction {
 	private String type;
 	private BigDecimal amount;
 	private String deposit;
+	private String status;
 	
 	public Transaction(String id, String type, BigDecimal amount, String deposit) {
 		this.id = id;
@@ -47,5 +48,11 @@ public class Transaction {
 	}
 	public void setDeposit(String deposit) {
 		this.deposit = deposit;
+	}
+	public String getStatus() {
+		return status;
+	}
+	public void setStatus(String status) {
+		this.status = status;
 	}
 }
