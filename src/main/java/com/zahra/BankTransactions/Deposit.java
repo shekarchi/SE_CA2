@@ -9,6 +9,13 @@ public class Deposit {
 	private BigDecimal initialBalance;
 	private BigDecimal upperBound;
 	
+	public Deposit(String customer, String id, BigDecimal initialBalance, BigDecimal upperBound) {
+		this.customer = customer;
+		this.id = id;
+		this.initialBalance = initialBalance;
+		this.upperBound = upperBound;
+	}
+	
 	public String getCustomer() {
 		return customer;
 	}

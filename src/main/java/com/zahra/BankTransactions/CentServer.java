@@ -2,19 +2,72 @@ package com.zahra.BankTransactions;
 
 import java.io.BufferedReader;
 
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.math.BigDecimal;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.Iterator;
 
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
 public class CentServer {
 	
+	static String port = "";
+    static String outLog = "";
+    static ArrayList<Deposit> deposits = null;
+    
+    private static void addDeposit(JSONObject o) {
+    	String customerName = o.get(new String("customer")).toString();
+		String id = o.get("id").toString();
+		BigDecimal initialBalance = new BigDecimal(o.get("initialBalance").toString());
+		BigDecimal upperBound = new BigDecimal (o.get(new String("upperBound")).toString());
+		Deposit d = new Deposit(customerName, id, initialBalance, upperBound);
+		deposits.add(d);
+    }
+    
+    private static void parseJSONFile(String filename) {
+    	JSONParser parser = new JSONParser();
+        try {
+
+    		Object obj = parser.parse(new FileReader(filename));
+    		JSONObject jsonObject = (JSONObject) obj;
+
+    		port = (String) jsonObject.get("port").toString();
+    		
+    		JSONArray transactions = (JSONArray) jsonObject.get("deposits");
+    		Iterator<JSONObject> iterator = transactions.iterator();
+    		while (iterator.hasNext()) {
+    			addDeposit((JSONObject)(iterator.next()));
+    		}
+    		
+    		outLog = (String) jsonObject.get("outLog");
+
+    	} catch (FileNotFoundException e) {
+    		e.printStackTrace();
+    	} catch (IOException e) {
+    		e.printStackTrace();
+    	} catch (ParseException e) {
+    		e.printStackTrace();
+    	}
+    }
+	
+    private static void printParsedFile () {
+    	System.err.println(port + "\t" + outLog);
+    	for(int i=0; i<deposits.size(); i++)
+    		System.err.println(deposits.get(i).getCustomer() + " " + deposits.get(i).getId() + " " + deposits.get(i).getInitialBalance() + " " + deposits.get(i).getUpperBound());
+    }
+    
 	/**
      * Application method to run the server runs in an infinite loop
-     * listening on port 9898.  When a connection is requested, it
+     * listening on given port.  When a connection is requested, it
      * spawns a new thread to do the servicing and immediately returns
      * to listening.  The server keeps a unique client number for each
      * client that connects just to show interesting logging
@@ -23,12 +76,12 @@ public class CentServer {
     public static void main(String[] args) throws Exception {
         System.out.println("The server is running.");
         
-        JSONParser parser = new JSONParser();
+        deposits = new ArrayList<Deposit>();
         
-        System.err.println(parser.toString());
+        parseJSONFile("/home/zahra/eclipseWorkspace/BankTransactions/src/main/java/core.json");
         
         int clientNumber = 0;
-        int portNumber = 9898;
+        int portNumber = new Integer(port);
         ServerSocket listener = new ServerSocket(portNumber);
         try {
             while (true) {
@@ -51,7 +104,7 @@ public class CentServer {
         public Service(Socket socket, int clientNumber) {
             this.socket = socket;
             this.clientNumber = clientNumber;
-            log("New connection with client# " + clientNumber + " at " + socket);
+            System.out.println("New connection with client# " + clientNumber + " at " + socket);
         }
 
         /**
@@ -83,23 +136,15 @@ public class CentServer {
                     out.println(input.toUpperCase());
                 }
             } catch (IOException e) {
-                log("Error handling client# " + clientNumber + ": " + e);
+                System.out.println("Error handling client# " + clientNumber + ": " + e);
             } finally {
                 try {
                     socket.close();
                 } catch (IOException e) {
-                    log("Couldn't close a socket, what's going on?");
+                    System.out.println("Couldn't close a socket, what's going on?");
                 }
-                log("Connection with client# " + clientNumber + " closed");
+                System.out.println("Connection with client# " + clientNumber + " closed");
             }
-        }
-
-        /**
-         * Logs a simple message.  In this case we just write the
-         * message to the server applications standard output.
-         */
-        private void log(String message) {
-            System.out.println(message);
         }
     }
 }

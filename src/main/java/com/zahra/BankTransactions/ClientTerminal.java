@@ -112,33 +112,12 @@ public class ClientTerminal {
         // Consume the initial welcoming messages from the server
         for (int i = 0; i < 3; i++) {
             System.out.println(in.readLine() + "\n");
-        }
-        /*while(true) {
-        	String input = "";
-        	try{
-        		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        		input = br.readLine();
-        			
-        	}catch(IOException io){
-        		io.printStackTrace();
-        	}	
-    	    out.println(input);
-            String response;	
-            try {
-                response = in.readLine();
-                if (response == null || response.equals("")) {
-                    System.exit(0);
-                }
-            } catch (IOException ex) {
-                response = "Error: " + ex;
-            }
-            System.out.println(response + "\n");
-        }*/
+        }    
     }
     
     public void sendRequestToServer(ArrayList<Transaction> transactions) {
     	for(int i=0; i<transactions.size(); i++) {	
-    	    out.println(transactions.get(i).toString());
+    	    out.println(id + "#" + type + "#" +transactions.get(i).toString());
             String response;	
             try {
                 response = in.readLine();
@@ -157,7 +136,7 @@ public class ClientTerminal {
      */
     public static void main(String[] args) throws Exception {
     	
-    	MyXMLParser xmlParser = new ClientTerminal(). new MyXMLParser("/home/zahra/eclipseWorkspace/BankTransactions/src/main/java/terminal.xml");
+    	MyXMLParser xmlParser = new ClientTerminal(). new MyXMLParser("/home/zahra/eclipseWorkspace/BankTransactions/src/main/java/"+ args[0]);
     	xmlParser.parseXmlFile();
     	
     	ArrayList<Transaction> transactions = xmlParser.getTransactionsList();
